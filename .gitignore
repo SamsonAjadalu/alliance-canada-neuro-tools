@@ -1,0 +1,37 @@
+# Slurm / cluster
+slurm-*.out
+slurm_logs/
+*.e*
+*.o*
+
+# Oppni / neuroimaging outputs
+fmri_proc/
+*.mat
+*.nii
+*.nii.gz
+*.BRIK
+*.HEAD
+
+# Data (never commit)
+raw_data*/
+**/raw_data_bids*/
+
+# Locks / temp
+.pipe_key_lock/
+.mask_subj_idxes_lock*/
+pipe_key.lock
+__opptmp*/
+
+# OS / editor
+.DS_Store
+*~
+.vscode/
+.idea/
+
+# Local overrides (real paths, real cohort)
+input_auto.txt
+config.m
+pipeline1.txt
+paramfile.txt
+master_slurm.sh
+slurm_tickets/
