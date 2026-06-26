@@ -19,6 +19,7 @@ raw_data*/
 # Locks / temp
 .pipe_key_lock/
 .mask_subj_idxes_lock*/
+.roimask_lock*/
 pipe_key.lock
 __opptmp*/
 

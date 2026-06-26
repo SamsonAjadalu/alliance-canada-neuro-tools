@@ -1,6 +1,6 @@
 # Oppni B patches for parallel jobs
 
-Full-file replacements for stock Oppni B. Copy over your install under `oppni-code-nwc/oppni-b/`.
+Full-file replacements for stock Oppni. Copy over your install.
 
 ## P0 — `pipe_key.mat`
 
@@ -28,4 +28,24 @@ Stale lock (example for pipeline `Base1`):
 rm -rf fmri_proc/_group_level/.mask_subj_idxes_lock_pipe_Base1
 ```
 
-Apply **both** patches if you run many parallel P2 jobs on a shared filesystem (e.g. Lustre).
+## roimask_OP1 — group binary masks (CSF / WM / GM / tSD)
+
+```bash
+cp patches/roimask_OP1.m \
+   $SCRATCH/path/to/oppni-code-nwc/oppni-x/shared/roimask_OP1.m
+```
+
+At pass 2, every job calls `roimask_OP1`. Stock code rewrote `func_tSD_mask_grp.nii` on every job.
+
+Patch:
+
+1. **tSD `if exist` / `else save`** (same as CSF, WM, GM)
+2. **Shell `mkdir` lock** around the whole mask block — one job builds all four masks, others wait then verify
+
+Stale lock (example for pipeline `Base1`):
+
+```bash
+rm -rf fmri_proc/_group_level/.roimask_lock_pipe_Base1
+```
+
+Apply **all three** patches for many parallel P2 jobs on Lustre.

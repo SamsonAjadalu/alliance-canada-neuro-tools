@@ -10,10 +10,11 @@ Oppni B on Alliance clusters: one Slurm job per input row. Patches add filesyste
 
 ## Install patches (parallel jobs)
 
-See [patches/README.md](patches/README.md). Copy both files over stock Oppni B:
+See [patches/README.md](patches/README.md). Copy all three over stock Oppni:
 
 - **P0** — lock on `pipe_key.mat` (every job at startup)
 - **P2** — lock on `pipe_*_mask_subj_idxes.mat` (cohort registry at P2 startup)
+- **roimask_OP1** — lock on group binary masks + tSD if-exist fix (pass 2 group-mask step)
 
 ## Setup on scratch
 
@@ -63,6 +64,8 @@ When every subject in `input_auto.txt` has finished func part 1, re-submit the s
 | `subject_list_formask` / corrupt `mask_subj_idxes.mat` | Apply P2 patch |
 | Jobs hang at Step-0 | `rm -rf fmri_proc/_pipe_manager/.pipe_key_lock` (no jobs running) |
 | Jobs hang at P2 startup | `rm -rf fmri_proc/_group_level/.mask_subj_idxes_lock_pipe_Base1` (adjust `Base1` to your `PNAME`) |
+| `headerSize is not 348` on `func_tSD_mask_grp` | Apply `roimask_OP1` patch |
+| Jobs hang in `roimask_OP1` | `rm -rf fmri_proc/_group_level/.roimask_lock_pipe_Base1` |
 | `libGLw.so.1` | Use cluster AFNI in [setup.md](../../docs/setup.md) |
 | `Halting for now!` | Normal on pass 1 if other subjects not ready |
 | Changing subject list for group mask | Remove `fmri_proc/_group_level/` per Oppni docs |
