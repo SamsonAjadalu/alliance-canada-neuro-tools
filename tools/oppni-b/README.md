@@ -36,8 +36,8 @@ cp tools/oppni-b/input_auto.txt.example input_auto.txt
 ## Generate sbatch files
 
 ```bash
-python3 create_jobs.py
-# writes one slurm_tickets/*.sl per line in input_auto.txt, plus master_slurm.sh
+python3 create_jobs.py --pipeline pipeline1.txt
+# writes one slurm_tickets_<PNAME>/*.sl per line in input_auto.txt, plus master_slurm_<PNAME>.sh
 ```
 
 Or submit manually using [example_sbatch.sl](example_sbatch.sl) as a template. The last number in `P2_fmri_dataProcessing(..., ROW)` must match the row in `input_auto.txt`.
@@ -47,14 +47,14 @@ Or submit manually using [example_sbatch.sl](example_sbatch.sl) as a template. T
 Submit one job per subject. Each job runs heavy anat/func work for that row only.
 
 ```bash
-sbatch slurm_tickets/sub-EXAMPLE_ses-1_sbatch.sl
+sbatch slurm_tickets_<PNAME>/sub-EXAMPLE_ses-1_sbatch.sl
 ```
 
 If the log ends with `not all subjects processed enough to mask. Halting for now!` — that subject likely finished stage 1; wait until **all** subjects in `input_auto.txt` have completed before pass 2.
 
 ## Pass 2 — group masks and func part 2
 
-When every subject in `input_auto.txt` has finished func part 1, re-submit the same jobs (or `master_slurm.sh`).
+When every subject in `input_auto.txt` has finished func part 1, re-submit the same jobs (or `master_slurm_<PNAME>.sh`).
 
 ## Troubleshooting
 
