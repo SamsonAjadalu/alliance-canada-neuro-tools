@@ -1,20 +1,12 @@
 # Oppni B — parallel fMRI preprocessing
 
-Oppni B on Alliance clusters: one Slurm job per input row. Patches add filesystem locks for shared `.mat` files when many jobs start together.
+Oppni B on Alliance clusters: one Slurm job per input row.
 
 ## Prerequisites
 
 - [docs/setup.md](../../docs/setup.md) — modules, AFNI, MATLAB
 - Oppni and dependencies cloned on `$SCRATCH`
 - BIDS-style paths in your real `input_auto.txt` (on scratch, not in git)
-
-## Install patches (parallel jobs)
-
-See [patches/README.md](patches/README.md). Copy all three over stock Oppni:
-
-- **P0** — lock on `pipe_key.mat` (every job at startup)
-- **P2** — lock on `pipe_*_mask_subj_idxes.mat` (cohort registry at P2 startup)
-- **roimask_OP1** — lock on group binary masks + tSD if-exist fix (pass 2 group-mask step)
 
 ## Setup on scratch
 
@@ -60,11 +52,10 @@ When every subject in `input_auto.txt` has finished func part 1, re-submit the s
 
 | Symptom | Action |
 |---------|--------|
-| `Unable to read MAT-file` on `pipe_key.mat` | Apply P0 patch |
-| `subject_list_formask` / corrupt `mask_subj_idxes.mat` | Apply P2 patch |
+| `Unable to read MAT-file` on `pipe_key.mat` | Check that no stale or partial `pipe_key.mat` exists before rerunning |
+| `subject_list_formask` / corrupt `mask_subj_idxes.mat` | Re-run after all pass-1 subjects finish; remove stale group-level files only if no jobs are running |
 | Jobs hang at Step-0 | `rm -rf fmri_proc/_pipe_manager/.pipe_key_lock` (no jobs running) |
 | Jobs hang at P2 startup | `rm -rf fmri_proc/_group_level/.mask_subj_idxes_lock_pipe_Base1` (adjust `Base1` to your `PNAME`) |
-| `headerSize is not 348` on `func_tSD_mask_grp` | Apply `roimask_OP1` patch |
 | Jobs hang in `roimask_OP1` | `rm -rf fmri_proc/_group_level/.roimask_lock_pipe_Base1` |
 | `libGLw.so.1` | Use cluster AFNI in [setup.md](../../docs/setup.md) |
 | `Halting for now!` | Normal on pass 1 if other subjects not ready |

@@ -33,7 +33,7 @@ Use the **EasyBuild cluster AFNI** via `PATH` (above). In MATLAB, set the same p
 
 ## Oppni / neuro code
 
-Clone Oppni and dependencies on scratch, then point `config.m` at those paths. For parallel jobs, apply the P0 lock file under `tools/oppni-b/patches/`.
+Clone Oppni and dependencies on scratch, then point `config.m` at those paths.
 
 ## Verify environment
 

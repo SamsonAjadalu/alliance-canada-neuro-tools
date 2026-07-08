@@ -32,4 +32,4 @@ Some pipelines need every subject to finish stage 1 before group-level steps:
 
 ## Parallel writes to one file
 
-If many jobs update the same file at startup, use a filesystem lock (see Oppni B P0 patch) or serialize that step. Staggering `sbatch` submit time does **not** control when Slurm starts jobs after queue wait.
+If many jobs update the same file at startup, use a filesystem lock in the pipeline code or serialize that step. Staggering `sbatch` submit time does **not** control when Slurm starts jobs after queue wait.
