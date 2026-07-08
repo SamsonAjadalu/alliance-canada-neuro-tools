@@ -1,52 +1,90 @@
+#!/usr/bin/env python3
+"""Generate Slurm tickets for an Oppni P2 run. Ticket folder and master script use PNAME."""
+
+import argparse
 import os
 import re
+import sys
 
-# Set before running, or edit defaults below:
-#   export PROJECT_DIR=$SCRATCH/my_project
-PROJECT_DIR = os.environ.get("PROJECT_DIR", os.path.join(os.environ.get("SCRATCH", "/scratch"), "my_project"))
 
-input_file_path = os.path.join(PROJECT_DIR, "input_auto.txt")
-out_dir = PROJECT_DIR
+def parse_pname(pipeline_path: str) -> str:
+    with open(pipeline_path, "r") as f:
+        for line in f:
+            m = re.search(r"PNAME=\[([^\]]+)\]", line.strip())
+            if m:
+                return m.group(1)
 
-f_dir = PROJECT_DIR
-in_name = "input_auto.txt"
-pipe_name = "pipeline1.txt"
-param_name = "paramfile.txt"
+    sys.exit(f"ERROR: no PNAME= in {pipeline_path}")
 
-ticket_folder = os.path.join(PROJECT_DIR, "slurm_tickets")
-os.makedirs(ticket_folder, exist_ok=True)
 
-with open(input_file_path, "r") as f:
-    lines = [line.strip() for line in f if line.strip()]
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Create Oppni Slurm job tickets")
+    parser.add_argument(
+        "--base-dir",
+        default=".",
+        help="Project root (outpath passed to MATLAB)",
+    )
+    parser.add_argument("--input", default="input_auto.txt", help="Input file name")
+    parser.add_argument("--pipeline", required=True, help="Pipeline file name")
+    args = parser.parse_args()
 
-with open(os.path.join(PROJECT_DIR, "master_slurm.sh"), "w") as master_file:
-    for v, line in enumerate(lines, start=1):
-        match = re.search(r"PREFIX=([^\s]+)", line)
-        if not match:
-            continue
+    base_dir = os.path.abspath(args.base_dir)
+    pipeline_name = args.pipeline
+    pipeline_path = os.path.join(base_dir, pipeline_name)
+    input_name = args.input
+    input_path = os.path.join(base_dir, input_name)
+    param_name = "paramfile.txt"
 
-        prfix = match.group(1)
-        filename = f"{prfix}_sbatch.sl"
-        filepath = os.path.join(ticket_folder, filename)
+    if not os.path.isfile(pipeline_path):
+        sys.exit(f"ERROR: missing {pipeline_path}")
+    if not os.path.isfile(input_path):
+        sys.exit(f"ERROR: missing {input_path}")
 
-        with open(filepath, "w") as job_file:
-            job_file.write("#!/bin/bash -l\n")
-            job_file.write(f"#SBATCH --job-name={prfix}_sbatch\n")
-            job_file.write("#SBATCH --account=def-YOUR_ALLOC\n")
-            job_file.write("#SBATCH --time=0-05:00:00\n")
-            job_file.write("#SBATCH --ntasks=1\n")
-            job_file.write("#SBATCH --nodes=1\n")
-            job_file.write("#SBATCH --cpus-per-task=4\n")
-            job_file.write("#SBATCH --mem=64G\n\n")
+    pname = parse_pname(pipeline_path)
+    ticket_folder = os.path.join(base_dir, f"slurm_tickets_{pname}")
+    os.makedirs(ticket_folder, exist_ok=True)
+    os.makedirs(os.path.join(base_dir, "slurm_logs"), exist_ok=True)
 
-            matlab_cmd = (
-                f"matlab -nodisplay -nojvm -singleCompThread -r "
-                f"\"config; P2_fmri_dataProcessing(fullfile('{f_dir}','{in_name}'), "
-                f"fullfile('{f_dir}','{pipe_name}'), fullfile('{f_dir}','{param_name}'), "
-                f"'{out_dir}', 0, [], {v}); exit;\"\n"
-            )
-            job_file.write(matlab_cmd)
+    with open(input_path, "r") as f:
+        lines = [line.strip() for line in f if line.strip()]
 
-        master_file.write(f"sbatch {ticket_folder}/{filename}\n")
+    master_path = os.path.join(base_dir, f"master_slurm_{pname}.sh")
+    with open(master_path, "w") as master_file:
+        master_file.write("#!/bin/bash\n")
+        for v, line in enumerate(lines, start=1):
+            match = re.search(r"PREFIX=([^\s]+)", line)
+            if not match:
+                continue
 
-print(f"Done. Created master_slurm.sh and {len(lines)} SLURM files in {ticket_folder}/")
+            prfix = match.group(1)
+            filename = f"{prfix}_sbatch.sl"
+            filepath = os.path.join(ticket_folder, filename)
+
+            with open(filepath, "w") as job_file:
+                job_file.write("#!/bin/bash -l\n")
+                job_file.write(f"#SBATCH --job-name={prfix}_{pname}\n")
+                job_file.write("#SBATCH --account=def-nwc\n")
+                job_file.write("#SBATCH --time=0-05:00:00\n")
+                job_file.write("#SBATCH --ntasks=1\n")
+                job_file.write("#SBATCH --nodes=1\n")
+                job_file.write("#SBATCH --cpus-per-task=4\n")
+                job_file.write("#SBATCH --mem=64G\n")
+                job_file.write(f"#SBATCH --output={base_dir}/slurm_logs/%x_%j.out\n\n")
+
+                matlab_cmd = (
+                    f"matlab -nodisplay -nojvm -singleCompThread -r "
+                    f"\"config; P2_fmri_dataProcessing(fullfile('{base_dir}','{input_name}'), "
+                    f"fullfile('{base_dir}','{pipeline_name}'), fullfile('{base_dir}','{param_name}'), "
+                    f"'{base_dir}', 0, [], {v}); exit;\"\n"
+                )
+                job_file.write(matlab_cmd)
+
+            master_file.write(f"sbatch slurm_tickets_{pname}/{filename}\n")
+
+    print(f"Done. PNAME={pname}")
+    print(f"  {master_path}")
+    print(f"  {len(lines)} jobs in {ticket_folder}/")
+
+
+if __name__ == "__main__":
+    main()
