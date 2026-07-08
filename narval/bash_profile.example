@@ -1,0 +1,17 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+
+module load StdEnv/2023
+module load gcc/12.3
+module load matlab/2023b.2
+module load python/3.10.13
+
+module load ants/2.6.5
+module load fsl/6.0.7.20
+
+# Cluster AFNI 26.0.09 via PATH (do not module load afni; it can pull Python 3.11)
+export PATH="/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcc12/afni/26.0.09/bin:${PATH}"

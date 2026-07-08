@@ -8,6 +8,7 @@ Runbooks and templates for neuroimaging pipelines on [Digital Research Alliance 
 |------|-------------|
 | [docs/setup.md](docs/setup.md) | Modules, environment, `bash_profile` |
 | [docs/slurm.md](docs/slurm.md) | Submitting and monitoring jobs |
+| [narval/](narval/) | Narval shell setup examples and AFNI `count_afni` wrapper |
 | [shared/](shared/) | Example `bash_profile` and sbatch template |
 | [tools/oppni-b/](tools/oppni-b/) | Oppni B (fMRI) parallel workflow |
 | [tools/oppni-d/](tools/oppni-d/) | Placeholder |
