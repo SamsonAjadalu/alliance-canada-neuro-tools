@@ -71,6 +71,10 @@ def main() -> None:
                 job_file.write("#SBATCH --cpus-per-task=4\n")
                 job_file.write("#SBATCH --mem=64G\n")
                 job_file.write(f"#SBATCH --output={base_dir}/slurm_logs/%x_%j.out\n\n")
+                job_file.write('export MATLAB_PREFDIR="$SLURM_TMPDIR/matlab_pref"\n')
+                job_file.write('mkdir -p "$MATLAB_PREFDIR"\n')
+                job_file.write("export OPPNI_NODDI=OFF\n")
+                job_file.write("export OPPNI_DIFF_WARP=ON\n\n")
 
                 matlab_cmd = (
                     f"matlab -nodisplay -nojvm -singleCompThread -r "
