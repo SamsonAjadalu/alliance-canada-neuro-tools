@@ -21,7 +21,10 @@ cp tools/oppni-b/pipeline1.txt.example  pipeline1.txt
 cp tools/oppni-b/paramfile.txt.example  paramfile.txt
 cp tools/oppni-b/input_auto.txt.example input_auto.txt
 
-# Edit config.m: set addpath() to your oppni-code-nwc and neuro-code-nwc locations
+# Before submitting, point config.m at the code checkout:
+export OPPNI_ROOT=/path/to/oppni
+# OPPNI_ROOT must contain neuro-code-nwc/ and oppni-code-nwc/.
+# Set AFNI_BIN only when AFNI is not already available from the login profile/module.
 # Edit input_auto.txt: real PREFIX, ANAT, FUNC paths
 ```
 
