@@ -28,8 +28,31 @@ cp tools/oppni-b/input_auto.txt.example input_auto.txt
 ## Generate sbatch files
 
 ```bash
-python3 create_jobs.py --pipeline pipeline1.txt
-# writes one slurm_tickets_<PNAME>/*.sl per line in input_auto.txt, plus master_slurm_<PNAME>.sh
+python3 /path/to/alliance-canada-neuro-tools/tools/oppni-b/create_jobs.py \
+  --output-dir "$PROJECT_DIR" \
+  --input "$PROJECT_DIR/input_auto.txt" \
+  --pipeline "$PROJECT_DIR/pipeline1.txt" \
+  --param "$PROJECT_DIR/paramfile.txt" \
+  --config "$PROJECT_DIR/config.m" \
+  --time 0-05:00:00 --mem 32G --cpus 4
+# writes slurm_tickets_<PNAME>/*.sl, slurm_logs/, and master_slurm_<PNAME>.sh
+```
+
+All input, pipeline, parameter, and config paths are resolved to absolute paths,
+so those files may live anywhere. `--output-dir` is used only for generated
+tickets, logs, the master script, and the OPPNI output directory; it replaces
+the old `--base-dir` option. The generator checks that all four files exist,
+rejects missing or duplicate `PREFIX` values, and runs the supplied `config.m`
+by its absolute path. Resource options are configurable with `--account`,
+`--time`, `--mem`, and `--cpus`.
+
+For files in the current directory, use their names directly; do not repeat
+the output directory in the file argument:
+
+```bash
+python3 /path/to/create_jobs.py --output-dir "$PROJECT_DIR" \
+  --input input_auto.txt --pipeline pipeline1.txt \
+  --param paramfile.txt --config config.m
 ```
 
 Or submit manually using [example_sbatch.sl](example_sbatch.sl) as a template. The last number in `P2_fmri_dataProcessing(..., ROW)` must match the row in `input_auto.txt`.
