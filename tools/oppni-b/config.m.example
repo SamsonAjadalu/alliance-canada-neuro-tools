@@ -1,15 +1,9 @@
-% Copy this file to config.m and set OPPNI_ROOT before submitting jobs.
-% OPPNI_ROOT must contain both neuro-code-nwc and oppni-code-nwc.
+% Copy this file to config.m and replace both paths with absolute paths.
 
-oppni_root = getenv('OPPNI_ROOT');
-if isempty(oppni_root)
-    error('Set OPPNI_ROOT to the directory containing neuro-code-nwc and oppni-code-nwc.');
-end
-
-neuro_root = fullfile(oppni_root, 'neuro-code-nwc');
-oppni_code_root = fullfile(oppni_root, 'oppni-code-nwc');
+neuro_root = '/absolute/path/to/neuro-code-nwc';
+oppni_code_root = '/absolute/path/to/oppni-code-nwc';
 if ~isfolder(neuro_root) || ~isfolder(oppni_code_root)
-    error('OPPNI_ROOT must contain neuro-code-nwc and oppni-code-nwc.');
+    error('Update neuro_root and oppni_code_root to existing absolute paths.');
 end
 
 % Set AFNI_BIN if AFNI is not already available through the login profile/module.
